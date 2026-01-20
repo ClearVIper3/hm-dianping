@@ -23,12 +23,11 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
+        //把认证信息从服务器存储的session转移到Redis集群中，由客户端不变的header来获取认证信息，解决了分布式支持的问题
         String token = request.getHeader("authorization");
         if(StrUtil.isBlank(token)){
             return true;
         }
-
 
         String tokenKey = LOGIN_USER_KEY + token;
 
