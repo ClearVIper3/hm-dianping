@@ -11,8 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.RedisConstants.LOGIN_CODE_TTL;
-import static com.hmdp.utils.RedisConstants.LOGIN_USER_KEY;
+import static com.hmdp.utils.RedisConstants.*;
 
 public class RefreshTokenInterceptor implements HandlerInterceptor {
 
@@ -41,7 +40,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
 
         UserHolder.saveUser(userDTO);
 
-        stringRedisTemplate.expire(tokenKey, LOGIN_CODE_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.SECONDS);
 
         return true;
     }
