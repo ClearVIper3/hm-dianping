@@ -58,6 +58,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         boolean success = seckillVoucherService.update()
                 .setSql("stock = stock - 1")
                 .eq("voucher_id",seckillId)
+                .gt("stock",0)  //乐观锁的CAS方案 where stock > 0
                 .update();
 
         if(!success){
