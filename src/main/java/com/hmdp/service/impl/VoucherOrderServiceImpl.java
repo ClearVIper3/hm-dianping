@@ -34,7 +34,6 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private RedisIdWorker redisIdWorker;
 
     @Override
-    @Transactional
     public Result seckill(Long seckillId) {
 
         //获取秒杀券的信息
@@ -64,6 +63,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         }
     }
 
+    @Transactional
     public Result createVoucherOrder(Long seckillId){
 
         //一人一单
