@@ -9,6 +9,7 @@ import com.hmdp.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.UserHolder;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,10 +56,30 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             return Result.fail("库存不足");
         }
 
+        Long userId = UserHolder.getUser().getId();
+        synchronized (userId.toString().intern()) {
+            //获取代理对象（事务）
+            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
+            return proxy.createVoucherOrder(seckillId);
+        }
+    }
+
+    public Result createVoucherOrder(Long seckillId){
+
+        //一人一单
+        Long userId = UserHolder.getUser().getId();
+        //查询订单
+        int count = query().eq("user_id", userId).eq("voucher_id", seckillId).count();
+        //判断订单是否存在
+        if(count > 0){
+            //用户已经购买过了
+            return Result.fail("当前用户已经购买过一次!");
+        }
+
         boolean success = seckillVoucherService.update()
                 .setSql("stock = stock - 1")
                 .eq("voucher_id",seckillId)
-                .gt("stock",0)  //乐观锁的CAS方案 where stock > 0
+                .gt("stock",0)  //乐观锁的CAS方案解决超卖问题 where stock > 0
                 .update();
 
         if(!success){
@@ -67,7 +88,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         }
 
         VoucherOrder voucherOrder = new VoucherOrder();
-        voucherOrder.setUserId(UserHolder.getUser().getId());
+        voucherOrder.setUserId(userId);
         voucherOrder.setVoucherId(seckillId);
         voucherOrder.setId(redisIdWorker.nextId("order"));
         save(voucherOrder);
