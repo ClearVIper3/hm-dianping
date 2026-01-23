@@ -61,11 +61,13 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
     private IVoucherOrderService proxy;
 
+    //阻塞队列
     private BlockingQueue<VoucherOrder> orderTasks = new ArrayBlockingQueue<>(1024 * 1024);
     //异步处理线程池
     private static final ExecutorService SECKILL_ORDER_EXECUTOR = Executors.newSingleThreadExecutor();
 
     //在类初始化之后执行，因为当这个类初始化好了之后，随时都是有可能要执行的
+    //投喂线程操作
     @PostConstruct
     private void init() {
         SECKILL_ORDER_EXECUTOR.submit(new VoucherOrderHandler());
@@ -73,6 +75,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
     // 用于线程池处理的任务
     // 当初始化完毕后，就会去从对列中去拿信息
+    //规定了线程的操作
     private class VoucherOrderHandler implements Runnable {
 
         @Override
@@ -80,6 +83,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             while (true) {
                 try {
                     // 1.获取队列中的订单信息
+                    //take的时候队列为空，线程就会堵塞
                     VoucherOrder voucherOrder = orderTasks.take();
                     // 2.创建订单
                     handleVoucherOrder(voucherOrder);
@@ -90,6 +94,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         }
     }
 
+    //在创建订单前做安全检查（锁）
     private void handleVoucherOrder(VoucherOrder voucherOrder) {
         //1.获取用户
         Long userId = voucherOrder.getUserId();
@@ -112,6 +117,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         }
     }
 
+    //秒杀接口
     @Override
     public Result seckill(Long voucherId) {
         //获取用户
@@ -146,6 +152,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         return Result.ok(orderId);
     }
 
+    //专门在做创建订单的操作
     @Transactional
     public void createVoucherOrder(VoucherOrder voucherOrder) {
         Long userId = voucherOrder.getUserId();
