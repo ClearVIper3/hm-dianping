@@ -33,4 +33,10 @@ public class FollowController {
     public Result follow(@PathVariable("id") Long followUserId){
         return followService.isFollow(followUserId);
     }
+
+    //共同关注功能
+    @GetMapping("/common/{id}")
+    public Result followCommons(@PathVariable("id") Long id){
+        return followService.followCommons(id);
+    }
 }
