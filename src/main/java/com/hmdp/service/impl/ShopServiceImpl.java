@@ -12,7 +12,6 @@ import com.hmdp.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.CacheClient;
 import com.hmdp.utils.SystemConstants;
-import io.netty.util.internal.StringUtil;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.GeoResults;

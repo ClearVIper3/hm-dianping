@@ -12,6 +12,7 @@ import com.hmdp.entity.User;
 import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.RegexUtils;
+import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -89,6 +92,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.SECONDS);
 
         return Result.ok(token);
+    }
+
+    @Override
+    public Result sign() {
+        //获取当前用户
+        Long userId = UserHolder.getUser().getId();
+        //获取当前年月
+        LocalDateTime now = LocalDateTime.now();
+        //拼接key
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
+        String key = USER_SIGN_KEY + userId + keySuffix;
+        //获取当前是这个月的第几天
+        int dayOfMonth = now.getDayOfMonth();
+        //写入Redis BitMap
+        stringRedisTemplate.opsForValue().setBit(key, dayOfMonth - 1, true);
+        return Result.ok();
     }
 
     private User createUserWithPhone(String phone){
