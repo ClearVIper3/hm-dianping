@@ -106,4 +106,10 @@ public class UserController {
     public Result signCount(){
         return userService.signCount();
     }
+
+    /*
+    HyperLogLog用法
+    stringRedisTemplate.opsForHyperLogLog().add("h77", new String[7777]);
+    Long count = stringRedisTemplate.opsForHyperLogLog().size("h77");
+    */
 }
