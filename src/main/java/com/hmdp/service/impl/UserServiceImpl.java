@@ -134,7 +134,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Result.ok(0);
         }
         Long num = result.get(0);
-        if(num == 0 || num == null){
+        if(num == null || num == 0){
             return Result.ok(0);
         }
 
